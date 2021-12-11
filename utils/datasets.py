@@ -156,6 +156,29 @@ class _RepeatSampler:
             yield from iter(self.sampler)
 
 
+class LoadImage:
+    def __init__(self, img, img_size=640, stride=32):
+        self.img_size = img_size
+        self.stride = stride
+        self.img = img
+
+    def __iter__(self):
+        self.count = 0
+        return self
+
+    def __len__(self):
+        return 1
+
+    def __next__(self):
+        if (self.count == 1):
+            raise StopIteration
+        self.count += 1
+        img = letterbox(self.img, self.img_size, stride=self.stride)[0]
+        img = img[:, :, ::-1].transpose(2, 0, 1)
+        img = np.ascontiguousarray(img)
+        return img, self.img
+
+
 class LoadImages:
     # YOLOv5 image/video dataloader, i.e. `python detect.py --source image.jpg/vid.mp4`
     def __init__(self, path, img_size=640, stride=32, auto=True):
